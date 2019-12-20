@@ -321,8 +321,7 @@ gdal_vrtmerge.py -o merged.vrt %s"""
             self.output = \
                 os.path.splitext(os.path.basename(self.input))[0]
 
-        if not self.options.title:
-            self.options.title = os.path.basename(self.input)
+        self.title = os.path.basename(self.input)
 
         if self.options.url and not self.options.url.endswith('/'):
             self.options.url += '/'
@@ -646,17 +645,6 @@ gdal2tiles temp.vrt"""
         (east, north) = (self.omaxx, self.omaxy)
 
         self.swne = (south, west, north, east)
-
-        # Generate openlayers.html
-
-        if self.options.webviewer in ('all', 'openlayers'):
-            if not self.options.resume \
-                or not os.path.exists(os.path.join(self.output,
-                    'openlayers.html')):
-                f = open(os.path.join(self.output, 'openlayers.html'
-                         ), 'w')
-                f.write(self.generate_openlayers())
-                f.close()
 
         # Generate tilemapresource.xml.
 
@@ -1084,7 +1072,7 @@ gdal2tiles temp.vrt"""
         """
 
         args = {}
-        args['title'] = self.options.title
+        args['title'] = self.title
         (args['south'], args['west'], args['north'], args['east']) = \
             self.swne
         args['tilesize'] = self.tilesize

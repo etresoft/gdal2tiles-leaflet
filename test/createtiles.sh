@@ -10,9 +10,9 @@ case $1 in
     ../gdal2tiles-multiprocess.py -l -p raster -w none karta.jpg tiles
     ;;
   z)
-    ../gdal2tiles.py -l -p raster -w none karta.jpg -z 0-5 tiles
+    ../gdal2tiles.py karta.jpg -z 0-5 tiles
     ;;
   *)
-    ../gdal2tiles.py -l -p raster -w none karta.jpg tiles
+    ../gdal2tiles.py karta.jpg tiles
     ;;
 esac
