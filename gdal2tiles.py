@@ -108,84 +108,6 @@ import math
 
 MAXZOOMLEVEL = 32
 
-# ---------------------
-# TODO: Finish Zoomify implemtentation!!!
-
-class Zoomify(object):
-
-    """
-    Tiles compatible with the Zoomify viewer
-    ----------------------------------------
-    """
-
-    def __init__(
-        self,
-        width,
-        height,
-        tilesize=256,
-        tileformat='jpg',
-        ):
-        """Initialization of the Zoomify tile tree"""
-
-        self.tilesize = tilesize
-        self.tileformat = tileformat
-        imagesize = (width, height)
-        tiles = (math.ceil(width / tilesize), math.ceil(height
-                 / tilesize))
-
-        # Size (in tiles) for each tier of pyramid.
-
-        self.tierSizeInTiles = []
-        self.tierSizeInTiles.push(tiles)
-
-        # Image size in pixels for each pyramid tierself
-
-        self.tierImageSize = []
-        self.tierImageSize.append(imagesize)
-
-        while imagesize[0] > tilesize or imageSize[1] > tilesize:
-            imagesize = (math.floor(imagesize[0] / 2),
-                         math.floor(imagesize[1] / 2))
-            tiles = (math.ceil(imagesize[0] / tilesize),
-                     math.ceil(imagesize[1] / tilesize))
-            self.tierSizeInTiles.append(tiles)
-            self.tierImageSize.append(imagesize)
-
-        self.tierSizeInTiles.reverse()
-        self.tierImageSize.reverse()
-
-        # Depth of the Zoomify pyramid, number of tiers (zoom levels)
-
-        self.numberOfTiers = len(self.tierSizeInTiles)
-
-        # Number of tiles up to the given tier of pyramid.
-
-        self.tileCountUpToTier = []
-        self.tileCountUpToTier[0] = 0
-        for i in range(1, self.numberOfTiers + 1):
-            self.tileCountUpToTier.append(self.tierSizeInTiles[i
-                    - 1][0] * self.tierSizeInTiles[i - 1][1]
-                    + self.tileCountUpToTier[i - 1])
-
-    def tilefilename(
-        self,
-        x,
-        y,
-        z,
-        ):
-        """Returns filename for tile with given coordinates"""
-
-        tileIndex = x + y * self.tierSizeInTiles[z][0] \
-            + self.tileCountUpToTier[z]
-        return os.path.join('TileGroup%.0f' % math.floor(tileIndex
-                            / 256), '%s-%s-%s.%s' % (z, x, y,
-                            self.tileformat))
-
-
-# =============================================================================
-# =============================================================================
-# =============================================================================
-
 class GDAL2Tiles(object):
 
     # -------------------------------------------------------------------------
@@ -496,23 +418,6 @@ then run:
 gdal2tiles temp.vrt"""
                        % self.input)
 
-        # Get NODATA value
-
-        self.in_nodata = []
-        for i in range(1, self.in_ds.RasterCount + 1):
-            if self.in_ds.GetRasterBand(i).GetNoDataValue() != None:
-                self.in_nodata.append(self.in_ds.GetRasterBand(i).GetNoDataValue())
-        if self.options.srcnodata:
-            nds = list(map(float, self.options.srcnodata.split(',')))
-            if len(nds) < self.in_ds.RasterCount:
-                self.in_nodata = (nds
-                                  * self.in_ds.RasterCount)[:self.in_ds.RasterCount]
-            else:
-                self.in_nodata = nds
-
-        if self.options.verbose:
-            print 'NODATA: %s' % self.in_nodata
-
         #
         # Here we should have RGBA input dataset opened in self.in_ds
         #
@@ -546,50 +451,9 @@ gdal2tiles temp.vrt"""
         else:
             self.dataBandsCount = self.out_ds.RasterCount
 
-        # Read the georeference
-
-        self.out_gt = self.out_ds.GetGeoTransform()
-
-        # originX, originY = self.out_gt[0], self.out_gt[3]
-        # pixelSize = self.out_gt[1] # = self.out_gt[5]
-
-        # Test the size of the pixel
-
-        # MAPTILER - COMMENTED
-        # if self.out_gt[1] != (-1 * self.out_gt[5]) and self.options.profile != 'raster':
-            # TODO: Process corectly coordinates with are have swichted Y axis (display in OpenLayers too)
-            # self.error("Size of the pixel in the output differ for X and Y axes.")
-
-        # Report error in case rotation/skew is in geotransform (possible only in 'raster' profile)
-
-        if (self.out_gt[2], self.out_gt[4]) != (0, 0):
-            self.error('Georeference of the raster contains rotation or skew. Such raster is not supported. Please use gdalwarp first.'
-                       )
-
-            # TODO: Do the warping in this case automaticaly
-
-        #
         # Here we expect: pixel is square, no rotation on the raster
-        #
 
-        # Output Bounds - coordinates in the output SRS
-
-        self.ominx = self.out_gt[0]
-        self.omaxx = self.out_gt[0] + self.out_ds.RasterXSize \
-            * self.out_gt[1]
-        self.omaxy = self.out_gt[3]
-        self.ominy = self.out_gt[3] - self.out_ds.RasterYSize \
-            * self.out_gt[1]
-
-        # Note: maybe round(x, 14) to avoid the gdal_translate behaviour, when 0 becomes -1e-15
-
-        if self.options.verbose:
-            print ('Bounds (output srs):', round(self.ominx, 13),
-                   self.ominy, self.omaxx, self.omaxy)
-
-        #
         # Calculating ranges for tiles in different zoom levels
-        #
 
         log2 = lambda x: math.log10(x) / math.log10(2)  # log2 (base 2 logarithm)
 
@@ -641,8 +505,8 @@ gdal2tiles temp.vrt"""
         if not os.path.exists(self.output):
             os.makedirs(self.output)
 
-        (west, south) = (self.ominx, self.ominy)
-        (east, north) = (self.omaxx, self.omaxy)
+        (west, south) = (0, 0)
+        (east, north) = (self.out_ds.RasterXSize, -self.out_ds.RasterYSize)
 
         self.swne = (south, west, north, east)
 
@@ -664,10 +528,6 @@ gdal2tiles temp.vrt"""
         print 'Generating Base Tiles:'
 
         if self.options.verbose:
-
-            # mx, my = self.out_gt[0], self.out_gt[3] # OriginX, OriginY
-            # px, py = self.mercator.MetersToPixels( mx, my, self.tmaxz)
-            # print "Pixel coordinates:", px, py, (mx, my)
 
             print ''
             print 'Tiles generated from the max zoom level:'
@@ -1095,7 +955,7 @@ gdal2tiles temp.vrt"""
             s += \
                 """        <TileSet href="%s%d" units-per-pixel="%.14f" order="%d"/>\n""" \
                 % (args['publishurl'], z, 2 ** (self.nativezoom
-                   - z) * self.out_gt[1], z)
+                   - z), z)
         s += """      </TileSets>
     </TileMap>
     """
