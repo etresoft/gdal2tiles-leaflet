@@ -2,6 +2,8 @@
 
 rm -rf tiles
 
+export GDAL_LIBJPEG_LARGEST_MEM_ALLOC=10691937
+
 case $1 in
   mpz)
     ../gdal2tiles-multiprocess.py -l -p raster -z 0-5 -w none karta.jpg tiles
