@@ -308,10 +308,10 @@ gdal_vrtmerge.py -o merged.vrt %s"""
         # Output the results
 
         if self.options.verbose:
-            print ('Options:', self.options)
-            print ('Input:', self.input)
-            print ('Output:', self.output)
-            print 'Cache: %s MB' % (gdal.GetCacheMax() / 1024 / 1024)
+            # print ('Options:', self.options)
+            print 'Input: ', self.input
+            print 'Output: ', self.output
+            # print 'Cache: %s MB' % (gdal.GetCacheMax() / 1024 / 1024)
             print ''
 
     # -------------------------------------------------------------------------
@@ -389,9 +389,7 @@ gdal_vrtmerge.py -o merged.vrt %s"""
             raise Exception('No input file was specified')
 
         if self.options.verbose:
-            print ('Input file:', '( %sP x %sL - %s bands)'
-                   % (self.in_ds.RasterXSize, self.in_ds.RasterYSize,
-                   self.in_ds.RasterCount))
+            print 'Input file:', '%sP x %sL - %s bands' % (self.in_ds.RasterXSize, self.in_ds.RasterYSize, self.in_ds.RasterCount)
 
         if not self.in_ds:
 
@@ -423,9 +421,7 @@ gdal2tiles temp.vrt"""
         #
 
         if self.options.verbose:
-            print ('Preprocessed file:', '( %sP x %sL - %s bands)'
-                   % (self.in_ds.RasterXSize, self.in_ds.RasterYSize,
-                   self.in_ds.RasterCount))
+            print 'Preprocessed file:', '%sP x %sL - %s bands' % (self.in_ds.RasterXSize, self.in_ds.RasterYSize, self.in_ds.RasterCount)
 
         # Are the reference systems the same? Reproject if necessary.
 
@@ -467,7 +463,7 @@ gdal2tiles temp.vrt"""
             self.tmaxz = self.nativezoom
 
         if self.options.verbose:
-            print ('Native zoom of the raster:', self.nativezoom)
+            print 'Native zoom of the raster:', self.nativezoom
 
         # Get the minimal zoom level (whole raster in one tile)
 
@@ -538,6 +534,8 @@ gdal2tiles temp.vrt"""
 
         (tminx, tminy, tmaxx, tmaxy) = self.tminmax[self.tmaxz]
 
+        print "(%d %d) (%d %d)" % (tminx, tminy, tmaxx, tmaxy)
+
         # Just the center tile
         # tminx = tminx+ (tmaxx - tminx)/2
         # tminy = tminy+ (tmaxy - tminy)/2
@@ -549,8 +547,8 @@ gdal2tiles temp.vrt"""
         querysize = self.querysize
 
         if self.options.verbose:
-            print ('dataBandsCount: ', self.dataBandsCount)
-            print ('tilebands: ', tilebands)
+            print 'dataBandsCount: ', self.dataBandsCount
+            print 'tilebands: ', tilebands
 
         # print tminx, tminy, tmaxx, tmaxy
 
@@ -572,7 +570,8 @@ gdal2tiles temp.vrt"""
                 tilefilename = os.path.join(self.output, str(tz),
                         str(tx), '%s.%s' % (ty, self.tileext))
                 if self.options.verbose:
-                    print (ti, '/', tcount, tilefilename)  # , "( TileMapService: z / x / y )"
+                    print ti, '/', tcount, tilefilename
+                    # , "( TileMapService: z / x / y )"
 
                 if self.options.resume and os.path.exists(tilefilename):
                     if self.options.verbose:
@@ -617,8 +616,8 @@ gdal2tiles temp.vrt"""
                         * self.tilesize))
 
                 if self.options.verbose:
-                    print ('\tReadRaster Extent: ', (rx, ry, rxsize,
-                           rysize), (wx, wy, wxsize, wysize))
+                    print '\tReadRaster Extent:', (rx, ry, rxsize,
+                           rysize), (wx, wy, wxsize, wysize)
 
                 # Query is in 'nearest neighbour' but can be bigger in then the tilesize
                 # We scale down the query to the tilesize by supplied algorithm.
@@ -751,7 +750,8 @@ gdal2tiles temp.vrt"""
                             str(tx), '%s.%s' % (ty, self.tileext))
 
                     if self.options.verbose:
-                        print (ti, '/', tcount, tilefilename)  # , "( TileMapService: z / x / y )"
+                        print ti, '/', tcount, tilefilename
+                        # , "( TileMapService: z / x / y )"
 
                     if self.options.resume \
                         and os.path.exists(tilefilename):
@@ -812,6 +812,7 @@ gdal2tiles temp.vrt"""
                                     tileposx = self.tilesize
                                 else:
                                     tileposx = 0
+                                    
                                 dsquery.WriteRaster(
                                     tileposx,
                                     tileposy,
@@ -837,15 +838,7 @@ gdal2tiles temp.vrt"""
                                 strict=0)
 
                     if self.options.verbose:
-                        print (
-                            '\tbuild from zoom',
-                            tz + 1,
-                            ' tiles:',
-                            (2 * tx, 2 * ty),
-                            (2 * tx + 1, 2 * ty),
-                            (2 * tx, 2 * ty + 1),
-                            (2 * tx + 1, 2 * ty + 1),
-                            )
+                        print '\tbuild from zoom', tz + 1, 'tiles:', (2 * tx, 2 * ty), (2 * tx + 1, 2 * ty), (2 * tx, 2 * ty + 1), (2 * tx + 1, 2 * ty + 1)
 
                     if not self.options.verbose:
                         self.progressbar(ti / float(tcount))
