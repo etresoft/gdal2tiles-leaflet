@@ -2,7 +2,7 @@
 
 rm -rf tiles
 
-export GDAL_LIBJPEG_LARGEST_MEM_ALLOC=10691937
+export GDAL_ALLOW_LARGE_LIBJPEG_MEM_ALLOC=1
 
 case $1 in
   mpz)
