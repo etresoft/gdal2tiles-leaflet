@@ -50,6 +50,7 @@ except:
 
 import os
 import math
+import time
 
 try:
     from PIL import Image
@@ -130,6 +131,9 @@ class GDAL2Tiles(object):
         # Generation of the overview tiles (higher in the pyramid)
 
         self.generate_overview_tiles()
+        
+        print "read ", self.readtime
+        print "write ", self.writetime
 
     # -------------------------------------------------------------------------
 
@@ -165,6 +169,9 @@ class GDAL2Tiles(object):
         self.stopped = False
         self.input = None
         self.output = None
+        
+        self.readtime = 0
+        self.writetime = 0
 
         # Tile format
 
@@ -624,6 +631,8 @@ gdal2tiles temp.vrt"""
 
                 # Tile dataset in memory
 
+                start = time.time()
+                
                 dstile = self.mem_drv.Create('', self.tilesize,
                         self.tilesize, tilebands)
                 data = ds.ReadRaster(
@@ -644,6 +653,12 @@ gdal2tiles temp.vrt"""
                     wysize,
                     )
 
+                end = time.time()
+                
+                self.readtime += end - start
+                
+                start = time.time()
+                
                 if self.tilesize == querysize:
 
                     # Use the ReadRaster result directly in tiles ('nearest neighbour' query)
@@ -709,6 +724,10 @@ gdal2tiles temp.vrt"""
 
                     self.out_drv.CreateCopy(tilefilename, dstile,
                             strict=0)
+
+                end = time.time()
+                
+                self.writetime += end - start
 
                 del dstile
 
