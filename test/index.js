@@ -2,7 +2,7 @@
 ;(function (window) {
   function init (mapid) {
     var minZoom = 0
-    var maxZoom = 5
+    var maxZoom = 6
     var img = [
       3831, // original width of image `karta.jpg`
       3101  // original height of image
@@ -29,7 +29,7 @@
     }).addTo(map)
 
     // the tile layer containing the image generated with gdal2tiles --leaflet ...
-    L.tileLayer('./tiles/{z}/{x}/{y}.png', {
+    L.tileLayer('./tiles2/{z}/{x}/{y}.png', {
       noWrap: true,
       attribution: 'Map <a href="https://commons.wikimedia.org/wiki/' +
         'File:Karta_%C3%B6ver_Europa,_1672_-_Skoklosters_slott_-_95177.tif">' +
