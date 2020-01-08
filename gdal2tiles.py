@@ -118,6 +118,8 @@ class GDAL2Tiles(object):
 
         # Opening and preprocessing of the input file
 
+        start = time.time()
+        
         self.open_input()
 
         # Generation of main metadata files and HTML viewers
@@ -132,8 +134,11 @@ class GDAL2Tiles(object):
 
         self.generate_overview_tiles()
         
+        end = time.time()
+        
         print "read ", self.readtime
         print "write ", self.writetime
+        print "overall ", end - start
 
     # -------------------------------------------------------------------------
 
