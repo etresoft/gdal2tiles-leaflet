@@ -631,10 +631,10 @@ gdal2tiles temp.vrt"""
 
                 # Tile dataset in memory
 
-                start = time.time()
-                
                 dstile = self.mem_drv.Create('', self.tilesize,
                         self.tilesize, tilebands)
+                start = time.time()
+                
                 data = ds.ReadRaster(
                     rx,
                     ry,
