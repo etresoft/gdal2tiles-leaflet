@@ -837,13 +837,20 @@ gdal2tiles temp.vrt"""
                                 else:
                                     tileposx = 0
                                     
+                                start = time.time()
+                                
+                                data = dsquerytile.ReadRaster(0, 0, self.tilesize, self.tilesize)
+                                
+                                end = time.time()
+            
+                                self.readtime += end - start
+
                                 dsquery.WriteRaster(
                                     tileposx,
                                     tileposy,
                                     self.tilesize,
                                     self.tilesize,
-                                    dsquerytile.ReadRaster(0, 0,
-        self.tilesize, self.tilesize),
+                                    data,
                                     band_list=list(range(1, tilebands
         + 1)),
                                     )
